@@ -1,28 +1,29 @@
-# ===============================
-# Java / Spring Boot
-# ===============================
+HELP.md
 target/
-*.log
-*.class
-*.jar
-*.war
-*.ear
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-# ===============================
-# Maven
-# ===============================
-.mvn/
-build/
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
 
 # ===============================
 # IDE files
 # ===============================
-.idea/
+### IntelliJ IDEA ###
+.idea
+*.iws
 *.iml
+*.ipr
+
+### VS Code ###
 .vscode/
-.classpath
-.project
-.settings/
 
 # ===============================
 # OS files
@@ -59,3 +60,13 @@ docker-compose.override.yml
 # Misc
 # ===============================
 *.swp
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
