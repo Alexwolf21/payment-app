@@ -86,7 +86,7 @@ public class PaymentService {
             throw new IllegalStateException("Only PENDING payments can be confirmed");
         }
 
-        payment.setStatus(PaymentStatus.PENDING);
+        payment.setStatus(PaymentStatus.SUCCESS);
         payment.setUpdatedAt(LocalDateTime.now());
 
         Payment updatedPayment = paymentRepository.save(payment);
