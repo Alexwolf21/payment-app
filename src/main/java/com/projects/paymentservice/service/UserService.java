@@ -1,6 +1,7 @@
 package com.projects.paymentservice.service;
 
 import com.projects.paymentservice.dto.UserRequest;
+import com.projects.paymentservice.dto.UserResponse;
 import com.projects.paymentservice.entity.User;
 import com.projects.paymentservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public User registerUser(UserRequest request){
+    public UserResponse registerUser(UserRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("User request cannot be null");
         }
@@ -34,7 +35,7 @@ public class UserService {
 
         String email = request.getEmail().trim().toLowerCase();
 
-        if(userRepository.findByEmail(email).isPresent()){
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("User already exists with email: " + email);
         }
 
@@ -47,24 +48,40 @@ public class UserService {
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
-        return userRepository.save(user);
+
+        User savedUser = userRepository.save(user);
+        return toUserResponse(savedUser);
     }
 
-    public User getUserById(Long userId){
+    public UserResponse getUserById(Long userId) {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("Invalid user id");
         }
 
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+
+        return toUserResponse(user);
     }
 
-    public User getUserByEmail(String email){
+    public UserResponse getUserByEmail(String email) {
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("Email is required");
         }
 
-        return userRepository.findByEmail(email.trim().toLowerCase())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User user = userRepository.findByEmail(email.trim().toLowerCase())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+
+        return toUserResponse(user);
+    }
+
+    private UserResponse toUserResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
     }
 }
