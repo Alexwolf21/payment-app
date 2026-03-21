@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findByIdempotencyKey(String IdempotencyKey);
-    List<Payment> findByPaymentStatus(PaymentStatus status);
+    List<Payment> findByStatus(PaymentStatus status);
 }
