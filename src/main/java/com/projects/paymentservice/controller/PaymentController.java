@@ -18,19 +18,16 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<PaymentResponse> createPayment(@Valid @RequestBody PaymentCreateRequest request) {
-        PaymentResponse response = paymentService.createPayment(request);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(paymentService.createPayment(request), HttpStatus.CREATED);
     }
 
     @PostMapping("/{paymentId}/confirm")
     public ResponseEntity<PaymentResponse> confirmPayment(@PathVariable Long paymentId) {
-        PaymentResponse response = paymentService.confirmPayment(paymentId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(paymentService.confirmPayment(paymentId));
     }
 
     @GetMapping("/{paymentId}")
     public ResponseEntity<PaymentResponse> getPaymentById(@PathVariable Long paymentId) {
-        PaymentResponse response = paymentService.getPaymentById(paymentId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(paymentService.getPaymentById(paymentId));
     }
 }

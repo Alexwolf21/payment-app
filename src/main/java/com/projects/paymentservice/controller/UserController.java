@@ -18,19 +18,16 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserRequest request) {
-        UserResponse createdUser = userService.registerUser(request);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.registerUser(request), HttpStatus.CREATED);
     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long userId) {
-        UserResponse user = userService.getUserById(userId);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userService.getUserById(userId));
     }
 
     @GetMapping("/email/{emailId}")
-    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String emailId){
-        UserResponse user = userService.getUserByEmail(emailId);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String emailId) {
+        return ResponseEntity.ok(userService.getUserByEmail(emailId));
     }
 }
