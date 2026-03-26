@@ -3,10 +3,13 @@ package com.projects.paymentservice.service;
 import com.projects.paymentservice.dto.UserRequest;
 import com.projects.paymentservice.dto.UserResponse;
 import com.projects.paymentservice.entity.User;
+import com.projects.paymentservice.exception.DuplicateResourceException;
+import com.projects.paymentservice.exception.ResourceNotFoundException;
 import com.projects.paymentservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 
 @Service
@@ -36,7 +39,7 @@ public class UserService {
         String email = request.getEmail().trim().toLowerCase();
 
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new IllegalArgumentException("User already exists with email: " + email);
+            throw new DuplicateResourceException("User already exists with email: " + email);
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -59,7 +62,7 @@ public class UserService {
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         return toUserResponse(user);
     }
@@ -70,7 +73,7 @@ public class UserService {
         }
 
         User user = userRepository.findByEmail(email.trim().toLowerCase())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
 
         return toUserResponse(user);
     }

@@ -5,11 +5,14 @@ import com.projects.paymentservice.dto.PaymentResponse;
 import com.projects.paymentservice.entity.Payment;
 import com.projects.paymentservice.entity.User;
 import com.projects.paymentservice.enums.PaymentStatus;
+import com.projects.paymentservice.exception.DuplicateResourceException;
+import com.projects.paymentservice.exception.InvalidPaymentStateException;
+import com.projects.paymentservice.exception.ResourceNotFoundException;
 import com.projects.paymentservice.repository.PaymentRepository;
 import com.projects.paymentservice.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,7 +25,7 @@ public class PaymentService {
     private final UserRepository userRepository;
 
     @Transactional
-    public PaymentResponse createPayment(PaymentCreateRequest request){
+    public PaymentResponse createPayment(PaymentCreateRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Payment request cannot be null");
         }
@@ -47,14 +50,14 @@ public class PaymentService {
             throw new IllegalArgumentException("Idempotency key is required");
         }
 
-        String IdempotencyKey = request.getIdempotencyKey().trim();
+        String idempotencyKey = request.getIdempotencyKey().trim();
 
-        if(paymentRepository.findByIdempotencyKey(IdempotencyKey).isPresent()){
-            throw new IllegalArgumentException("Payment already exists with idempotency key: " + IdempotencyKey);
+        if (paymentRepository.findByIdempotencyKey(idempotencyKey).isPresent()) {
+            throw new DuplicateResourceException("Payment already exists for idempotency key: " + idempotencyKey);
         }
 
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + request.getUserId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUserId()));
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -64,7 +67,7 @@ public class PaymentService {
                 .currency(request.getCurrency().trim().toUpperCase())
                 .recipientName(request.getRecipientName().trim())
                 .status(PaymentStatus.PENDING)
-                .idempotencyKey(IdempotencyKey)
+                .idempotencyKey(idempotencyKey)
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
@@ -74,16 +77,16 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentResponse confirmPayment(Long paymentId){
+    public PaymentResponse confirmPayment(Long paymentId) {
         if (paymentId == null || paymentId <= 0) {
             throw new IllegalArgumentException("Invalid payment id");
         }
 
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new IllegalArgumentException("Payment id not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + paymentId));
 
         if (payment.getStatus() != PaymentStatus.PENDING) {
-            throw new IllegalStateException("Only PENDING payments can be confirmed");
+            throw new InvalidPaymentStateException("Only PENDING payments can be confirmed");
         }
 
         payment.setStatus(PaymentStatus.SUCCESS);
@@ -93,18 +96,18 @@ public class PaymentService {
         return mapToResponse(updatedPayment);
     }
 
-    public PaymentResponse getPaymentById(Long paymentId){
+    public PaymentResponse getPaymentById(Long paymentId) {
         if (paymentId == null || paymentId <= 0) {
             throw new IllegalArgumentException("Invalid payment id");
         }
 
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + paymentId));
 
         return mapToResponse(payment);
     }
 
-    private PaymentResponse mapToResponse(Payment payment){
+    private PaymentResponse mapToResponse(Payment payment) {
         return PaymentResponse.builder()
                 .id(payment.getId())
                 .userId(payment.getUser() != null ? payment.getUser().getId() : null)
