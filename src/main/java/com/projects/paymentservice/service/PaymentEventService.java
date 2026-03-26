@@ -19,20 +19,22 @@ public class PaymentEventService {
     private final PaymentEventRepository paymentEventRepository;
 
     @Transactional
-    public void recordEvent(Payment payment, PaymentEventType paymentEventType, String details ) {
-        PaymentEvent paymentEvent = PaymentEvent.builder()
+    public void recordEvent(Payment payment, PaymentEventType eventType, String details) {
+        PaymentEvent event = PaymentEvent.builder()
                 .payment(payment)
-                .userId(payment!= null && payment.getUser()!=null ? payment.getUser().getId(): null)
-                .idempotencyKey(payment!= null ? payment.getIdempotencyKey() : null)
-                .eventType(paymentEventType)
+                .userId(payment != null && payment.getUser() != null ? payment.getUser().getId() : null)
+                .idempotencyKey(payment != null ? payment.getIdempotencyKey() : null)
+                .eventType(eventType)
                 .details(details)
                 .createdAt(LocalDateTime.now())
                 .build();
+
+        paymentEventRepository.save(event);
     }
 
     @Transactional
     public void recordRejectedEvent(Long userId, String idempotencyKey, String details) {
-        PaymentEvent paymentEvent = PaymentEvent.builder()
+        PaymentEvent event = PaymentEvent.builder()
                 .payment(null)
                 .userId(userId)
                 .idempotencyKey(idempotencyKey)
@@ -40,6 +42,8 @@ public class PaymentEventService {
                 .details(details)
                 .createdAt(LocalDateTime.now())
                 .build();
+
+        paymentEventRepository.save(event);
     }
 
     @Transactional(readOnly = true)
