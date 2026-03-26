@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
@@ -26,30 +25,6 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponse createPayment(PaymentCreateRequest request) {
-        if (request == null) {
-            throw new IllegalArgumentException("Payment request cannot be null");
-        }
-
-        if (request.getUserId() == null || request.getUserId() <= 0) {
-            throw new IllegalArgumentException("Valid userId is required");
-        }
-
-        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be greater than zero");
-        }
-
-        if (request.getCurrency() == null || request.getCurrency().trim().isEmpty()) {
-            throw new IllegalArgumentException("Currency is required");
-        }
-
-        if (request.getRecipientName() == null || request.getRecipientName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Recipient name is required");
-        }
-
-        if (request.getIdempotencyKey() == null || request.getIdempotencyKey().trim().isEmpty()) {
-            throw new IllegalArgumentException("Idempotency key is required");
-        }
-
         String idempotencyKey = request.getIdempotencyKey().trim();
 
         if (paymentRepository.findByIdempotencyKey(idempotencyKey).isPresent()) {
