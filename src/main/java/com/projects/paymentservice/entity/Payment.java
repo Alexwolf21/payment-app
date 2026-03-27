@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Table(
         name = "payments",
         indexes = {
-                @Index(name = "idx_payments_user_id", columnList = "user_id"),
+                @Index(name = "idx_payments_payer_id", columnList = "payer_id"),
                 @Index(name = "idx_payments_idempotency_key", columnList = "idempotency_key")
         },
         uniqueConstraints = {
@@ -29,9 +29,8 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "payer_id", nullable = false, length = 100)
+    private String payerId;
 
     @Column(name = "amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;

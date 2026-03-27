@@ -4,14 +4,12 @@ import com.projects.paymentservice.dto.PaymentCreateRequest;
 import com.projects.paymentservice.dto.PaymentEventResponse;
 import com.projects.paymentservice.dto.PaymentResponse;
 import com.projects.paymentservice.entity.Payment;
-import com.projects.paymentservice.entity.User;
 import com.projects.paymentservice.enums.PaymentEventType;
 import com.projects.paymentservice.enums.PaymentStatus;
 import com.projects.paymentservice.exception.DuplicateResourceException;
 import com.projects.paymentservice.exception.InvalidPaymentStateException;
 import com.projects.paymentservice.exception.ResourceNotFoundException;
 import com.projects.paymentservice.repository.PaymentRepository;
-import com.projects.paymentservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +22,6 @@ import java.util.List;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final UserRepository userRepository;
     private final PaymentEventService paymentEventService;
 
     @Transactional
@@ -33,27 +30,17 @@ public class PaymentService {
 
         if (paymentRepository.findByIdempotencyKey(idempotencyKey).isPresent()) {
             paymentEventService.recordRejectedEvent(
-                    request.getUserId(),
+                    request.getPayerId(),
                     idempotencyKey,
                     "Rejected: duplicate idempotency key"
             );
             throw new DuplicateResourceException("Payment already exists for idempotency key: " + idempotencyKey);
         }
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> {
-                    paymentEventService.recordRejectedEvent(
-                            request.getUserId(),
-                            idempotencyKey,
-                            "Rejected: user not found"
-                    );
-                    return new ResourceNotFoundException("User not found with id: " + request.getUserId());
-                });
-
         LocalDateTime now = LocalDateTime.now();
 
         Payment payment = Payment.builder()
-                .user(user)
+                .payerId(request.getPayerId().trim())
                 .amount(request.getAmount())
                 .currency(request.getCurrency().trim().toUpperCase())
                 .recipientName(request.getRecipientName().trim())
@@ -141,7 +128,7 @@ public class PaymentService {
     private PaymentResponse mapToResponse(Payment payment) {
         return PaymentResponse.builder()
                 .id(payment.getId())
-                .userId(payment.getUser() != null ? payment.getUser().getId() : null)
+                .payerId(payment.getPayerId())
                 .amount(payment.getAmount())
                 .currency(payment.getCurrency())
                 .recipientName(payment.getRecipientName())

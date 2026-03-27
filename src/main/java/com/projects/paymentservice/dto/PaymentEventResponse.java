@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class PaymentEventResponse {
     private Long id;
     private Long paymentId;
-    private Long userId;
+    private String payerId;
     private String idempotencyKey;
     private PaymentEventType eventType;
     private String details;

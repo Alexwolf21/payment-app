@@ -14,8 +14,8 @@ import java.math.BigDecimal;
 @Builder
 public class PaymentCreateRequest {
 
-    @NotNull(message = "User ID is required")
-    private Long userId;
+    @NotBlank(message = "Payer ID is required")
+    private String payerId;
 
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be greater than zero")

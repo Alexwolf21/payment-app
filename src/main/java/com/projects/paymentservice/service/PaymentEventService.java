@@ -22,7 +22,7 @@ public class PaymentEventService {
     public void recordEvent(Payment payment, PaymentEventType eventType, String details) {
         PaymentEvent event = PaymentEvent.builder()
                 .payment(payment)
-                .userId(payment != null && payment.getUser() != null ? payment.getUser().getId() : null)
+                .payerId(payment != null ? payment.getPayerId() : null)
                 .idempotencyKey(payment != null ? payment.getIdempotencyKey() : null)
                 .eventType(eventType)
                 .details(details)
@@ -33,10 +33,10 @@ public class PaymentEventService {
     }
 
     @Transactional
-    public void recordRejectedEvent(Long userId, String idempotencyKey, String details) {
+    public void recordRejectedEvent(String payerId, String idempotencyKey, String details) {
         PaymentEvent event = PaymentEvent.builder()
                 .payment(null)
-                .userId(userId)
+                .payerId(payerId)
                 .idempotencyKey(idempotencyKey)
                 .eventType(PaymentEventType.REJECTED)
                 .details(details)
@@ -58,7 +58,7 @@ public class PaymentEventService {
         return PaymentEventResponse.builder()
                 .id(event.getId())
                 .paymentId(event.getPayment() != null ? event.getPayment().getId() : null)
-                .userId(event.getUserId())
+                .payerId(event.getPayerId())
                 .idempotencyKey(event.getIdempotencyKey())
                 .eventType(event.getEventType())
                 .details(event.getDetails())

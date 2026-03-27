@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 public class PaymentResponse {
     private Long id;
-    private Long userId;
+    private String payerId;
     private BigDecimal amount;
     private String currency;
     private String recipientName;

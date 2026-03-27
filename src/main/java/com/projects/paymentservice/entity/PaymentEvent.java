@@ -23,8 +23,10 @@ public class PaymentEvent {
     @JoinColumn(name = "payment_id", nullable = true)
     private Payment payment;
 
-    private Long userId;
+    @Column(name = "payer_id", length = 100)
+    private String payerId;
 
+    @Column(name = "idempotency_key")
     private String idempotencyKey;
 
     @Enumerated(EnumType.STRING)
